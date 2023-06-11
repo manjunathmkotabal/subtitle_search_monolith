@@ -10,7 +10,7 @@ This project is a video search application that allows users to search for video
 
 ### Dependencies
 
-* Django , celery 
+* Django, celery 
 * Linux OS
 
 ### Installing
