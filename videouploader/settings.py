@@ -142,15 +142,8 @@ CELERY_IMPORTS = (
 
 #AWS Settings
 
-AWS_ACCESS_KEY_ID = 'AKIAR7I3Y3YLZY42MPMZ'
-AWS_SECRET_ACCESS_KEY = 'G5oUuSO0bPFInvMbAphoHHB4jOJF6vHp9qz3Sho3'
-AWS_STORAGE_BUCKET_NAME = 'ecowiser-vedio'
-AWS_S3_REGION_NAME = 'ap-south-1'  # e.g., 'us-east-1'
-
-# Set the S3 bucket URL for serving static files
-STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'
-
-
-AWS_DYNAMODB_REGION_NAME = 'ap-south-1'
-
-AWS_DEFAULT_REGION = 'ap-south-1'
+AWS_ACCESS_KEY_ID = ''
+AWS_SECRET_ACCESS_KEY = ''
+AWS_S3_BUCKET_NAME = ''
+AWS_S3_REGION_NAME = ''
+AWS_DYNAMODB_TABLE_NAME = '' 
