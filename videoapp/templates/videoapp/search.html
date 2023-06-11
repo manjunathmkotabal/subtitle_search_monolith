@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Videos</title>
+    <style>
+        :root {
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+            --button-bg-color: #5cb85c;
+            --button-text-color: #fff;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--bg-color);
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .video-player {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: var(--text-color);
+            margin-top: 0;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button[type="submit"] {
+            padding: 10px 20px;
+            background-color: var(--button-bg-color);
+            color: var(--button-text-color);
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 3px;
+        }
+
+        .video-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .video-item {
+            margin-bottom: 10px;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .video-title {
+            margin: 0;
+        }
+
+        .upload-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            margin-top: 10px;
+        }
+
+        .upload-button a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--button-bg-color);
+            color: var(--button-text-color);
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 3px;
+        }
+
+        .scroll-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--button-bg-color);
+            color: var(--button-text-color);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .timestamps {
+            display: none;
+        }
+
+        .toggle-button {
+            background-color: #1eba09;
+            border: none;
+            color: #ebe6e6;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+
+        .timestamp-item {
+            margin-bottom: 10px;
+        }
+
+        .timestamp-link {
+            display: block;
+            color: blue;
+            cursor: pointer;
+            margin-bottom: 5px;
+        }
+
+        video::cue {
+            color: rgb(236, 236, 240); /* Change the color of the subtitle text */
+            background-color: rgba(16, 13, 13, 0.7); /* Change the background color of the subtitle box */
+            font-size: 16px; /* Change the font size of the subtitle text */
+            padding: 4px 8px; /* Adjust the padding around the subtitle text */
+            border-radius: 4px; /* Add rounded corners to the subtitle box */
+        }
+
+        video::cue(b){
+            font-weight: bold; /* Add bold styling to the subtitle text enclosed in <b> tags */
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Search Videos</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="text" name="keyword" placeholder="Enter a keyword or a phrase">
+            <button type="submit">Search</button>
+        </form>
+
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
+
+
+        {% if videos %}
+            <ul class="video-list">
+                {% for video in videos %}
+                    <li class="video-item">
+                        {% if video.video_url %}
+                            <video class="video-player" controls>
+                                <source src="{{ video.video_url }}" type="video/mp4">
+                                <track src="{{video.vtt_url}}" kind="subtitles" srclang="en" label="English">
+                                Your browser does not support the video tag.
+                            </video>
+                        {% endif %}
+
+                        {% if video.timestamps %}
+                            <h3>Timestamps:</h3>
+                            <button class="toggle-button">Show Timestamps</button>
+                            <ul class="timestamps">
+                                {% for timestamp in video.timestamps %}
+                                    <li class="timestamp-item">
+                                        <a href="#" class="timestamp-link" data-video-id="video-{{ video.id }}" data-start-time="{{ timestamp.start_time }}">{{ timestamp.start_time }} - {{ timestamp.end_time }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <div class="upload-button">
+            <a href="/">Upload Videos</a>
+        </div>
+
+        <button class="scroll-to-top" onclick="scrollToTop()">&#8593;</button>
+
+        <script>
+            function scrollToTop() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+        
+            var toggleButtons = document.querySelectorAll('.toggle-button');
+            toggleButtons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    var timestamps = this.nextElementSibling;
+                    timestamps.style.display = (timestamps.style.display === 'none') ? 'block' : 'none';
+                });
+            });
+        
+            var timestampLinks = document.querySelectorAll('.timestamp-link');
+            timestampLinks.forEach(function(link) {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    var startTime = parseFloat(this.getAttribute('data-start-time'));
+                    var videoPlayer = this.closest('.video-item').querySelector('.video-player');
+                    if (videoPlayer) {
+                        videoPlayer.currentTime = startTime;
+                        videoPlayer.play();
+                    }
+                });
+            });
+
+
+        </script>
+        
+    </div>
+</body>
+</html>
